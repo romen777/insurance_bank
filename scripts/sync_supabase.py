@@ -38,22 +38,48 @@ BATCH = 400
 
 
 # ── 자격증명 ────────────────────────────────────────────────────────────────
+# 자격증명을 찾는 자리 — 먼저 찾은 값이 이긴다.
+#   ① 이미 잡혀 있는 환경변수
+#   ② 이 저장소의 .env (저장소 전용으로 다르게 쓰고 싶을 때)
+#   ③ 메디클라우드 로컬 공용 .env — 같은 Supabase 프로젝트라 키를 두 번 적을 이유가 없다
+# INSURANCE_BANK_ENV 로 경로를 직접 지정하면 그것을 맨 앞에 둔다.
+ENV_FILES = [
+    ROOT / ".env",
+    Path("C:/mediclaud/.env"),
+    Path("C:/mediportal/.env"),
+]
+
+
 def load_env():
-    p = ROOT / ".env"
-    if p.exists():
-        for line in io.open(p, encoding="utf-8"):
+    seen = []
+    files = ([Path(os.environ["INSURANCE_BANK_ENV"])] if os.environ.get("INSURANCE_BANK_ENV") else []) + ENV_FILES
+    for p in files:
+        if not p.exists():
+            continue
+        n = 0
+        for line in io.open(p, encoding="utf-8", errors="replace"):
             line = line.strip()
             if not line or line.startswith("#") or "=" not in line:
                 continue
             k, v = line.split("=", 1)
-            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+            v = v.strip().strip('"').strip("'")
+            if not v or v.startswith("<") or v.endswith("..."):
+                continue                     # 채우지 않은 예시 값은 건너뛴다
+            if k.strip() not in os.environ:
+                os.environ[k.strip()] = v
+                n += 1
+        if n:
+            seen.append("%s(%d)" % (p, n))
     url = os.environ.get("SUPABASE_SIMSA_URL") or os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_SECRET_KEY") or os.environ.get("SUPABASE_SIMSA_KEY")
     if not url or not key:
-        sys.exit("SUPABASE_SIMSA_URL 과 SUPABASE_SECRET_KEY 가 필요합니다 (.env 또는 환경변수)")
-    if key.startswith("sb_publishable_") or key.startswith("eyJ") and "anon" in key:
+        sys.exit("SUPABASE_SIMSA_URL 과 SUPABASE_SIMSA_KEY(또는 SUPABASE_SECRET_KEY)를 찾지 못했습니다. "
+                 "찾아본 곳: " + " · ".join(str(p) for p in files))
+    if key.startswith("sb_publishable_") or (key.startswith("eyJ") and "anon" in key):
         sys.exit("anon 키로 보입니다. service 키(sb_secret_)를 쓰십시오 — "
                  "anon 이면 RLS 에 막혀 오류 없이 0건이 옵니다.")
+    if seen:
+        print("자격증명 — " + " · ".join(seen))
     return url.rstrip("/"), key
 
 
