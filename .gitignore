@@ -1,6 +1,7 @@
 # 로컬 자격증명 — Supabase service 키가 들어간다. 절대 커밋하지 않는다.
 .env
 .env.*
+!.env.example
 
 __pycache__/
 *.pyc
