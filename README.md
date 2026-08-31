@@ -12,7 +12,7 @@ insurance_bank/
 ├── scripts/
 │   ├── build_corpus.py      PDF → chunks.jsonl
 │   ├── diff_editions.py     판 대조 — 신설·개정·폐기
-│   └── sync_supabase.py     chunks.jsonl → Supabase gk_ref_bible
+│   └── sync_supabase.py     chunks.jsonl → 비공개 Supabase
 └── .env                     Supabase 자격증명 (커밋하지 않는다)
 ```
 
@@ -45,7 +45,7 @@ diff 가 「2,500줄 전부 변경」이 된다. 그래서 id 는 **내용**으�
 | 명세서·환자 정보 | 어디에도 두지 않는다 |
 | 골키퍼 룰 내용·판정 알고리즘 | 비공개 |
 | 이지스 운영DB 표명·소스 | 비공개 |
-| 원장님 미공개 저작물(당뇨병 길라잡이 등) | Supabase `gk_ref_chunk` |
+| 원장님 미공개 저작물(당뇨병 길라잡이 등) | 비공개 Supabase |
 | API 키·자격증명 | `.env` (gitignore) |
 
 올리기 전에 한 번 돌리십시오.

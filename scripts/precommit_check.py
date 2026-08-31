@@ -66,6 +66,8 @@ def main():
         p = ROOT / rel
         if not p.exists() or p.suffix.lower() in SKIP_EXT:
             continue
+        if p.resolve() == Path(__file__).resolve():
+            continue                      # 이 파일은 패턴 정의라 당연히 걸린다
         try:
             s = io.open(p, encoding="utf-8", errors="replace").read()
         except Exception:
